@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Scientific Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f0f2f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .panel {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      padding: 20px;
+      width: 300px;
+      min-height: 400px;
+    }
+    .calculator {
+      width: 380px;
+      display: flex;
+      flex-direction: column;
+    }
+    .calculator-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+      text-align: center;
+    }
+    .display {
+      background: #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      font-size: 24px;
+      color: #333;
+      text-align: right;
+      word-wrap: break-word;
+      min-height: 60px;
+      margin-bottom: 15px;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    button {
+      padding: 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.operator { background: #ff9f43; color: white; }
+    button.equal { background: #10ac84; color: white; grid-column: span 2; }
+    button.clear { background: #ee5253; color: white; }
+    button.function { background: #576574; color: white; }
+    button.number, button.dot { background: #dfe4ea; color: #333; }
+    button:hover { filter: brightness(1.1); }
+    .instructions p { margin: 5px 0; font-size: 14px; }
+    .history { font-size: 14px; color: #333; }
+    .history-entry { border-bottom: 1px solid #ccc; padding: 5px 0; }
+    .clear-history { background: #ee5253; color: white; padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+    .clear-history:hover { filter: brightness(1.1); }
+  </style>
+</head>
+<body>
+  <div class="panel instructions">
+    <h3>📘 Instructions</h3>
+    <p><b>Basic:</b> +, −, ×, ÷</p>
+    <p><b>√</b>: Square root</p>
+    <p><b>x²</b>: Square</p>
+    <p><b>1/x</b>: Reciprocal</p>
+    <p><b>%</b>: Percentage</p>
+    <p><b>±</b>: Change sign</p>
+    <p><b>π</b>: Pi constant</p>
+    <p><b>sin, cos, tan:</b> Trigonometry (degrees)</p>
+    <p><b>log:</b> Logarithm base 10</p>
+    <p><b>exp:</b> e<sup>x</sup></p>
+    <p><b>!</b>: Factorial</p>
+    <p>Use = to calculate result.</p>
+  </div>
+
+  <div class="calculator panel">
+    <div class="calculator-title">Scientific Calculator</div>
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="clear">C</button>
+      <button class="function">±</button>
+      <button class="function">%</button>
+      <button class="operator">/</button>
+      <button class="function">√</button>
+      <button class="function">x²</button>
+      <button class="function">1/x</button>
+      <button class="operator">*</button>
+      <button class="function">sin</button>
+      <button class="function">cos</button>
+      <button class="function">tan</button>
+      <button class="operator">-</button>
+      <button class="number">7</button>
+      <button class="number">8</button>
+      <button class="number">9</button>
+      <button class="operator">+</button>
+      <button class="number">4</button>
+      <button class="number">5</button>
+      <button class="number">6</button>
+      <button class="function">π</button>
+      <button class="number">1</button>
+      <button class="number">2</button>
+      <button class="number">3</button>
+      <button class="function">log</button>
+      <button class="number">0</button>
+      <button class="dot">.</button>
+      <button class="function">exp</button>
+      <button class="function">!</button>
+      <button class="equal">=</button>
+    </div>
+  </div>
+
+  <div class="panel history">
+    <h3>📝 History</h3>
+    <div id="history"></div>
+    <button class="clear-history" onclick="clearHistory()">Clear History</button>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const buttons = document.querySelectorAll("button");
+    const historyDiv = document.getElementById("history");
+    let currentInput = "";
+    let history = [];
+
+    function updateDisplay(value) {
+      display.textContent = value;
+    }
+
+    function addHistory(entry) {
+      history.push(entry);
+      const div = document.createElement("div");
+      div.className = "history-entry";
+      div.textContent = entry;
+      historyDiv.prepend(div);
+    }
+
+    function clearHistory() {
+      history = [];
+      historyDiv.innerHTML = "";
+    }
+
+    function factorial(n) {
+      if (n < 0) return "Error";
+      if (n === 0 || n === 1) return 1;
+      let res = 1;
+      for (let i = 2; i <= n; i++) res *= i;
+      return res;
+    }
+
+    buttons.forEach(button => {
+      button.addEventListener("click", () => {
+        const value = button.textContent;
+
+        if (button.classList.contains("clear")) {
+          currentInput = "";
+          updateDisplay("0");
+        } 
+        else if (button.classList.contains("equal")) {
+          try {
+            let result = eval(currentInput);
+            updateDisplay(result);
+            addHistory(currentInput + " = " + result);
+            currentInput = result.toString();
+          } catch {
+            updateDisplay("Error");
+            currentInput = "";
+          }
+        } 
+        else if (button.classList.contains("operator")) {
+          currentInput += ` ${value} `;
+          updateDisplay(currentInput);
+        } 
+        else if (button.classList.contains("function")) {
+          try {
+            if (value === "√") currentInput = Math.sqrt(eval(currentInput)).toString();
+            else if (value === "x²") currentInput = Math.pow(eval(currentInput),2).toString();
+            else if (value === "1/x") currentInput = (1/eval(currentInput)).toString();
+            else if (value === "±") currentInput = (-1*eval(currentInput)).toString();
+            else if (value === "%") currentInput = (eval(currentInput)/100).toString();
+            else if (value === "π") currentInput += Math.PI.toString();
+            else if (value === "sin") currentInput = Math.sin(eval(currentInput)*Math.PI/180).toString();
+            else if (value === "cos") currentInput = Math.cos(eval(currentInput)*Math.PI/180).toString();
+            else if (value === "tan") currentInput = Math.tan(eval(currentInput)*Math.PI/180).toString();
+            else if (value === "log") currentInput = Math.log10(eval(currentInput)).toString();
+            else if (value === "exp") currentInput = Math.exp(eval(currentInput)).toString();
+            else if (value === "!") currentInput = factorial(eval(currentInput)).toString();
+            updateDisplay(currentInput);
+          } catch {
+            updateDisplay("Error");
+            currentInput = "";
+          }
+        }
+        else {
+          currentInput += value;
+          updateDisplay(currentInput);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+
